@@ -1,0 +1,15 @@
+#pull official base image
+FROM python:3.9.6
+
+#set work directory
+WORKDIR /usr
+# update some packages and run a installation command
+RUN apt-get update -y && apt-get install unixodbc-dev
+
+# install dependencies
+COPY ./requirements.txt /usr/requirements/
+RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements.txt
+
+#for production 
+COPY . .
+CMD ["python","api.py"]

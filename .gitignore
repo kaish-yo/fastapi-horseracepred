@@ -1,0 +1,12 @@
+test_local/
+db_private/
+__pycache__
+desktop.ini
+main_bk.py
+.devcontainer
+.env
+old/
+app_test.py
+main_test.py
+horse-race-pred-firebase-firebase-adminsdk-ov2p6-e744c2a3c2.json
+tests.py
