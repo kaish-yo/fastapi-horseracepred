@@ -5,17 +5,21 @@ from model.main import MainData
 
 app = FastAPI()
 
-@app.get("/")
+@app.get("/") #ホーム画面
 def home():
     return {"message":"Welcome to Horse race prediction app!"}
 
-@app.get("/prediction/{race_id}")
+@app.get("/prediction/{race_id}") #モデルを用いて予測を実行する
 def pred(race_id: int):
     pred = MainData.predict(race_id)
     return pred
 
-@app.post("/model/update")
-def update_model():
+@app.post("/data/update") #Firebase上のデータベースをアップデートする
+def update_db():
+    return MainData.save_to_db()
+
+@app.post("/model/update") #学習モデルをアップデートする
+def update_model():  
     _, cm, cr = MainData.create_model()
     print(cm,cr)
     return {"Success":"Model updated"}

@@ -1,4 +1,5 @@
 import requests
+from joblib import Parallel, delayed
 from bs4 import BeautifulSoup
 import pandas as pd
 import numpy as np
@@ -35,7 +36,7 @@ class MainData():
     def scrape_train_data():
         this_year = datetime.now().year
         years = [this_year-1,this_year] #西暦 
-        def scraper(year,last_date): #この関数で入力した年をIDに含むレコードをスクレイピングする
+        def scraper(year): #この関数で入力した年をIDに含むレコードをスクレイピングする
             base_URL = "https://race.netkeiba.com/race/result.html?race_id="
             row_list=[]
             '''Correct after testing'''
@@ -70,68 +71,65 @@ class MainData():
                                     date_info = str(year) + '/' + date_info
                                     race_date = datetime.strptime(date_info,'%Y/%m/%d')
                                     race_date = race_date.timestamp()*1000
-                                print(race_date,last_date)
-                                if race_date>last_date: #DB内の最新のデータよりも新しい場合
-                                    print(f"This table is newer than the last record!:\n{race_id}")
-                                    all_rows = soup.find_all("tr",{"class":"FirstDisplay","class":"HorseList"})
-                                    #そのほかの共通データ
-                                    race_name = soup.find("div",{"class":"RaceName"}).text.rstrip("\n")
-                                    race_data_1 = soup.find("div",{"class":"RaceData01"}).text.split("/")
-                                    rd2 = soup.find("div",{"class":"RaceData02"}).find_all("span")
-                                    race_data_2 = [x.text for x in rd2]
-                                    for item in all_rows:
-                                        d = {}
-                                        #Race id
-                                        d["Race_id"]=race_id
-                                        #Race date
-                                        d["Race_date"]=race_date
-                                        #Race Name
-                                        d["Race_Name"]=race_name
-                                        #Race data 1
-                                        d["Race_data_1"]=race_data_1
-                                        #Race data 2
-                                        d["Race_data_2"]=race_data_2
-                                        #Ranking
-                                        d["Ranking"]=item.find("div",{"class":"Rank"}).text
-                                        #Uniform number
-                                        d["Uni_Num"]=item.find("td",{"class":"Num"}).div.text
-                                        #Horse number
-                                        d["Hor_Num"]=item.find("td",{"class":"Num","class":"Txt_C"}).div.text
-                                        #Horse Name
-                                        d["Hor_name"]=item.find("span",{"class":"Horse_Name"}).a.text
-                                        #Horse sex and age
-                                        d["Hor_sex_and_age"]=item.find("span",{"class":"Lgt_Txt","class":"Txt_C"}).text
-                                        #JockeyWeight
-                                        d["JockeyWeight"]=item.find("span",{"class":"JockeyWeight"}).text
-                                        #Jockey
-                                        d["Jockey"]=item.find("td",{"class":"Jockey"}).a.text
-                                        #Race Time
-                                        d["Race_Time"]=item.find_all("span",{"class":"RaceTime"})[0].text
-                                        #Arrival diff
-                                        d["Arrival_diff"]=item.find_all("td",{"class":"Time"})[1].text
-                                        #popularity
-                                        d["Popularity"]=item.find("span",{"class":"OddsPeople"}).text
-                                        #単勝人気
-                                        d["Odds_popularity"]=item.find_all("td",{"class":"Odds"})[1].text
-                                        #後3F
-                                        d["ato_3_F"]=item.find_all("td",{"class":"Time"})[-1].text
-                                        #Corner Ranking
-                                        d["Corner_ranking"]=item.find("td",{"class":"PassageRate"}).text
-                                        #厩舎1
-                                        d["Trainer_1"]=item.find("td",{"class":"Trainer"}).span.text
-                                        #厩舎2
-                                        d["Trainer_2"]=item.find("td",{"class":"Trainer"}).a.text
-                                        #HorseWeight
-                                        d["Horse_weight"]=item.find("td",{"class":"Weight"}).text[:4]
-                                        #HorseWeight flux
-                                        d["Horse_weight_Flux"]=item.find("td",{"class":"Weight"}).small.text
-                                        row_list.append(d)
-                                    print(f"craped data of {race_id}:\n{row_list}")
-                                    time.sleep(1)
-                                else:
-                                    pass
+                                
+                                print(f"This table is newer than the last record!:\n{race_id}")
+                                all_rows = soup.find_all("tr",{"class":"FirstDisplay","class":"HorseList"})
+                                #そのほかの共通データ
+                                race_name = soup.find("div",{"class":"RaceName"}).text.rstrip("\n")
+                                race_data_1 = soup.find("div",{"class":"RaceData01"}).text.split("/")
+                                rd2 = soup.find("div",{"class":"RaceData02"}).find_all("span")
+                                race_data_2 = [x.text for x in rd2]
+                                for item in all_rows:
+                                    d = {}
+                                    #Race id
+                                    d["Race_id"]=race_id
+                                    #Race date
+                                    d["Race_date"]=race_date
+                                    #Race Name
+                                    d["Race_Name"]=race_name
+                                    #Race data 1
+                                    d["Race_data_1"]=race_data_1
+                                    #Race data 2
+                                    d["Race_data_2"]=race_data_2
+                                    #Ranking
+                                    d["Ranking"]=item.find("div",{"class":"Rank"}).text
+                                    #Uniform number
+                                    d["Uni_Num"]=item.find("td",{"class":"Num"}).div.text
+                                    #Horse number
+                                    d["Hor_Num"]=item.find("td",{"class":"Num","class":"Txt_C"}).div.text
+                                    #Horse Name
+                                    d["Hor_name"]=item.find("span",{"class":"Horse_Name"}).a.text
+                                    #Horse sex and age
+                                    d["Hor_sex_and_age"]=item.find("span",{"class":"Lgt_Txt","class":"Txt_C"}).text
+                                    #JockeyWeight
+                                    d["JockeyWeight"]=item.find("span",{"class":"JockeyWeight"}).text
+                                    #Jockey
+                                    d["Jockey"]=item.find("td",{"class":"Jockey"}).a.text
+                                    #Race Time
+                                    d["Race_Time"]=item.find_all("span",{"class":"RaceTime"})[0].text
+                                    #Arrival diff
+                                    d["Arrival_diff"]=item.find_all("td",{"class":"Time"})[1].text
+                                    #popularity
+                                    d["Popularity"]=item.find("span",{"class":"OddsPeople"}).text
+                                    #単勝人気
+                                    d["Odds_popularity"]=item.find_all("td",{"class":"Odds"})[1].text
+                                    #後3F
+                                    d["ato_3_F"]=item.find_all("td",{"class":"Time"})[-1].text
+                                    #Corner Ranking
+                                    d["Corner_ranking"]=item.find("td",{"class":"PassageRate"}).text
+                                    #厩舎1
+                                    d["Trainer_1"]=item.find("td",{"class":"Trainer"}).span.text
+                                    #厩舎2
+                                    d["Trainer_2"]=item.find("td",{"class":"Trainer"}).a.text
+                                    #HorseWeight
+                                    d["Horse_weight"]=item.find("td",{"class":"Weight"}).text[:4]
+                                    #HorseWeight flux
+                                    d["Horse_weight_Flux"]=item.find("td",{"class":"Weight"}).small.text
+                                    row_list.append(d)
+                                print(f"craped data of {race_id}:\n{row_list}")
+                                time.sleep(1)
             return row_list
-        row_list = Parallel(n_jobs=-1,verbose=10)(delayed(scraper)(year,last_date) for year in years)
+        row_list = Parallel(n_jobs=-1,verbose=10)(delayed(scraper)(year) for year in years)
         # print(row_list)
         df = pd.DataFrame(row_list)
         print(f"df after scraping:\n{df}")
@@ -399,11 +397,16 @@ class MainData():
 
     @classmethod
     def save_to_db(cls): #scraping -> update db
-        # df = scrape_train_data()
-        # print("Scraping finished.")
-        # df.to_json("df.json",orient="records")
-        # print("Stored df.json locally.")
+        #First, scrape and make a dataframe of the whole race data.
+        df = MainData.scrape_train_data()
+        print("Scraping finished.")
+
+        #Next, save the data as a json file to access locally.
+        df.to_json("df.json",orient="records")
+        print("Stored df.json locally.")
         print("Updating firebase realtime database...")
+        
+        #Lastly, update the database at Firebase.
         with open("df.json","r") as f:
             df = json.load(f)
         df = {
