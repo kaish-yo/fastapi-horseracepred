@@ -625,7 +625,7 @@ class MainData():
             le.fit(test_df[col])
             test_df[col] = le.transform(test_df[col])
         return test_df
-        
+
 
     @classmethod
     def create_model(cls): 
@@ -682,7 +682,7 @@ class MainData():
         
         print("All processes finished successfully.")
         return model, confusion_matrix(df['target'],result), classification_report(df['target'],result) #confusion matrix is in ndarray, and classification report is in string
-    
+
 
     @classmethod
     def predict(cls,race_id):  #The format is same as the one in database.
