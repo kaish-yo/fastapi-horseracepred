@@ -10,6 +10,8 @@ resources:
 
 variables:
   # Container registry service connection established during pipeline creation
+  azureSubscription: 'horse-race-app-resource-conn'
+  appName: 'horse-race-pred-realtime'
   dockerRegistryServiceConnection: 'ace00ce3-3881-4289-b0d2-67f328b52a91'
   imageRepository: 'kaishyofastapihorseracepred'
   containerRegistry: 'horseracepredimages.azurecr.io'
@@ -37,3 +39,12 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+    - script: |
+        docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
+      displayName: 'pytest'      
+    - task: AzureWebAppContainer@1
+      displayName: 'Azure Web App on Container Deploy'
+      inputs:
+        azureSubscription: 'horse-race-app-resource-conn'
+        appName: 'horse-race-pred-realtime'
+        containers: $(containerRegistry)/$(imageRepository):$(tag)
