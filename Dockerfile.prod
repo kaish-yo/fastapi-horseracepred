@@ -12,4 +12,4 @@ RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements.t
 
 #for production 
 COPY . .
-CMD ["python","api.py"]
+CMD ["python","app.py"]
