@@ -12,6 +12,7 @@ from sklearn.preprocessing import LabelEncoder
 import pyrebase
 import json
 import os
+import time
 
 
 class MainData():
