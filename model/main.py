@@ -13,7 +13,6 @@ import datetime
 from sklearn.model_selection import TimeSeriesSplit
 import lightgbm as lgb
 from sklearn.preprocessing import LabelEncoder
-import pyrebase
 import json
 import jpholiday
 import lxml
@@ -79,11 +78,12 @@ class MainData(SQLModel,table=True):
             date_after = str(results.Race_date) #int情報
             date_after = datetime.date(int(date_after[0:4]), int(date_after[4:6]), int(date_after[6:8])) #datetime情報
             print(f"The latest data is dated: {results.Race_date}")
+            date_until = datetime.date.today()        
         else:
             date_after = datetime.date(1999,1,1)
-        
-        print(f'data_after: {date_after}')
-
+            date_until = datetime.date.today()
+        print(f'date_after: {date_after}')
+        print(f'date_until:{date_until}')
         def race_day_list(date_after):
             this_year = datetime.datetime.now().year
             years = [this_year -1 ,this_year]
@@ -93,8 +93,8 @@ class MainData(SQLModel,table=True):
             def isHoliday(DATE):
                 Date = datetime.date(int(DATE[0:4]), int(DATE[4:6]), int(DATE[6:8]))
                 if Date.weekday() >= 5 or jpholiday.is_holiday(Date):
-                    if Date > date_after:
-                        return 1 #休日かつDBに保存済みの日付よりも後
+                    if Date > date_after and date_until >= Date:
+                        return 1 #休日かつDBに保存済みの日付よりも後かつ今日以前の日付
                     else:
                         return 0
                 else:
@@ -113,6 +113,8 @@ class MainData(SQLModel,table=True):
             return date_list
         #上記の関数を実行
         race_date_list = race_day_list(date_after=date_after)
+        if len(race_date_list) == 0: #該当の日付がない場合
+            return {"Result": "Database is already updated!"}
         
         #テストモードの場合は少な目に
         if test_mode==True:
@@ -358,23 +360,25 @@ class MainData(SQLModel,table=True):
     def save_to_db(cls,test_mode=False,test_len=5): #scraping -> update db
         df = MainData.scrape_train_data(test_mode=test_mode,test_len=test_len)
         print("Scraping finished.")
-        
+        if type(df) == dict :
+            return {"Result":"Update testing has successfully finished!!"}  
         if test_mode == True: #テストモード
             records = []
-            for index, record in df.iterrows():
+            for _, record in df.iterrows():
                 # print(f"count:{index}")
                 adding_rec = MainData(**record)
                 records.append(adding_rec)
             session = cls.database_connect()
             print("status: db connected")
-            session.add_all(records)
-            print("status: session created")
-            session.commit()
-            print("Update testing has successfully finished!!")
+            print(f'records to be stored:\n{records}')
+            # session.add_all(records)
+            # print("status: session created")
+            # session.commit()
+            # print("Update testing has successfully finished!!")
             return {"Result":"Update testing has successfully finished!!"}  
         else:
             records = []
-            for index, record in df.iterrows():
+            for _, record in df.iterrows():
                 # print(f"count:{index}")
                 adding_rec = MainData(**record)
                 records.append(adding_rec)
@@ -393,7 +397,11 @@ class MainData(SQLModel,table=True):
         base_URL = 'https://race.netkeiba.com/race/result.html?race_id='
         dfs = pd.read_html(base_URL+str(race_id))
         main_table = dfs[0]
-        main_table = main_table.dropna(subset=['馬体重(増減)'])
+        columns = ['Uni_num','Hor_Num','印','Hor_name','Hor_sex_and_age','JockeyWeight','Jockey','Trainer','Horse_weight_Flux','Odds','人気','登録','メモ']
+        main_table = pd.read_html('https://race.netkeiba.com/race/shutuba.html?race_id='+ str(race_id))[0]
+        main_table.columns= columns
+        main_table = main_table.drop(['印','人気','登録','メモ','Odds'],axis=1)
+        # main_table = main_table.dropna(subset=['馬体重(増減)'])
         main_table['Race_id'] = race_id
         ##天候などの共通データなどを引っ張る
         r = requests.get(base_URL + str(race_id), headers={'User-agent':'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0'})
@@ -424,12 +432,22 @@ class MainData(SQLModel,table=True):
         main_table['Race_data_2'] = main_table['Race_data_2'].apply(lambda x: race_data_2)
 
         ##main_tableのcolumn名を変更する
-        column_map = {'着順':'Ranking','枠':'Uni_num','馬番':'Hor_Num','馬名':'Hor_name','性齢':'Hor_sex_and_age',
-                    '斤量':'JockeyWeight','騎手':'Jockey','タイム':'Race_Time','着差':'Arrival_diff','人気':'Odds_popularity',
-                    '単勝オッズ':'single_odds','後3F':'ato_3_F','コーナー通過順':'Corner_ranking','厩舎':'Trainer',
-                    '馬体重(増減)':'Horse_weight_Flux'}
-        main_table = main_table.rename(columns=column_map)
-        df = main_table
+        # column_map = {'着順':'Ranking','枠':'Uni_num','馬番':'Hor_Num','馬名':'Hor_name','性齢':'Hor_sex_and_age',
+        #             '斤量':'JockeyWeight','騎手':'Jockey','タイム':'Race_Time','着差':'Arrival_diff','人気':'Odds_popularity',
+        #             '単勝オッズ':'single_odds','後3F':'ato_3_F','コーナー通過順':'Corner_ranking','厩舎':'Trainer',
+        #             '馬体重(増減)':'Horse_weight_Flux'}
+        # main_table = main_table.rename(columns=column_map)
+        columns =['Race_id','Race_date','Race_name','Ranking','Uni_num',
+                    'Hor_Num','Hor_name','Hor_sex_and_age','JockeyWeight',
+                    'Jockey','Race_Time','Odds_popularity','ato_3_F',
+                    'Trainer','Horse_weight_Flux','single_odds','start_time','weather',
+                    'field_condition','competition_count','venue_area','day_count',
+                    'horse_class','number_of_horses','Corner_rank_1','Corner_rank_2',
+                    'Corner_rank_3','Corner_rank_4','Horse_weight','field_length',
+                    'field_type_1','field_type_2',
+                    ]
+        df = pd.DataFrame(columns=columns)
+        df = pd.concat([df,main_table])
         # print(df)
         
         ##データを整形
@@ -460,7 +478,7 @@ class MainData(SQLModel,table=True):
         try:
             df['Corner_rank_2'] = df['Corner_ranking'].apply(lambda x: x.split('-')[1])
         except:
-            df['Corner_rank_3'] = None
+            df['Corner_rank_2'] = None
         try:
             df['Corner_rank_3'] = df['Corner_ranking'].apply(lambda x: x.split('-')[2])
         except:
@@ -497,7 +515,7 @@ class MainData(SQLModel,table=True):
 
         df['Race_Time'] = df['Race_Time'].apply(get_sec) #上記の関数を適用
         ##不要な列を削除する（主に分解し終えたもの）
-        df = df.drop(['Race_data_1','Race_data_2','field_type','Arrival_diff'],axis=1)
+        df = df.drop(['Race_data_1','Race_data_2','field_type'],axis=1)
         df = df[~df['Ranking'].isin(['中止', '除外', '取消', '失格'])] #失格などのレコードを削除
         
         ## データタイプを一括で変更する
@@ -505,7 +523,6 @@ class MainData(SQLModel,table=True):
         for column in changed_columns:
             df[column] = pd.to_numeric(df[column],errors='ignore')
         ##エラー対策のため下記のデータ加工を施す
-        df['Ranking'] = df['Ranking'].astype('int16')
         
         return df
         
@@ -523,7 +540,7 @@ class MainData(SQLModel,table=True):
             record = i.__dict__
             records.append(record)
         df = pd.DataFrame(records)
-        df = df.drop('_sa_instance_state',axis=1)
+        df = df.drop(['_sa_instance_state','record_id'],axis=1)
         return df
 
 
@@ -559,9 +576,7 @@ class MainData(SQLModel,table=True):
 
     @classmethod
     def transform_data_pred(cls,test_df):
-        with open("df.json",'r') as f:
-            df = json.load(f)
-            df = pd.DataFrame(df)  #データベースからすべてのtraining dataを引っこ抜く
+        df = cls.get_data()
         print(f"Race_date:\n{test_df['Race_date']}")
         #encoding
         # le = LabelEncoder()
@@ -585,7 +600,8 @@ class MainData(SQLModel,table=True):
         test_df = test_df.sort_values('Race_id')
         # test_df['Race_id'] = le.transform(test_df['Race_id']) #Race_idをtraining dataと合わせて変換する
         #カテゴリ変数をlabel encodingで変換する
-        cat_cols = ['Race_name', 'Hor_name', 'Hor_sex_and_age', 'Jockey', 'Trainer', 'weather', 'field_condition', 'venue_area', 'horse_class', 'field_type_1', 'field_type_2']
+        cat_cols = ['Race_name','Race_date','Hor_name', 'Hor_sex_and_age', 'Jockey', 'Trainer', 'weather', 'field_condition', 'venue_area', 'horse_class', 'field_type_1', 'field_type_2']
+        
         for col in cat_cols:
             le = LabelEncoder()
             le.fit(test_df[col])
@@ -598,7 +614,7 @@ class MainData(SQLModel,table=True):
         """transform the data from db for training"""
         print("Querying data from the database...")
         df = cls.get_data()
-        df.to_json("df.json",orient="records") #予測時のデータ加工に使用
+        # df.to_json("df.json",orient="records") #予測時のデータ加工に使用
         len_df = df.shape
         print(f"The number of records before transformation is {len_df}")
         print("Transforming the data...")
@@ -672,21 +688,18 @@ class MainData(SQLModel,table=True):
         #     return {"Error":"No table found."}
         Hor_df = df['Hor_name']
         df = cls.transform_data_pred(df)
-        try: #すでに結果が出ているデータの場合
-            df = df.drop(['Ranking','target','Race_Time','corner_rank_1',
-                'corner_rank_2', 'corner_rank_3', 'corner_rank_4'],axis=1)
-        except KeyError: #まだ結果が出ていない場合
-            df = df.drop(['Ranking'],axis=1)
-        #学習データとcolumnを一致させる
-        df = df[['Race_id','Race_date','Race_name','Ranking','Uni_num',
-                    'Hor_Num','Hor_name','Hor_sex_and_age','JockeyWeight',
-                    'Jockey','Race_Time','Odds_popularity','ato_3_F',
-                    'Trainer','Horse_weight_Flux','single_odds','start_time','weather',
-                    'field_condition','competition_count','venue_area','day_count',
-                    'horse_class','number_of_horses','Corner_rank_1','Corner_rank_2',
-                    'Corner_rank_3','Corner_rank_4','Horse_weight','field_length',
-                    'field_type_1','field_type_2',
-                    ]]
+        # #学習データとcolumnを一致させる
+        # df = df[['Race_id','Race_date','Race_name','Ranking','Uni_num',
+        #             'Hor_Num','Hor_name','Hor_sex_and_age','JockeyWeight',
+        #             'Jockey','Race_Time','Odds_popularity','ato_3_F',
+        #             'Trainer','Horse_weight_Flux','single_odds','start_time','weather',
+        #             'field_condition','competition_count','venue_area','day_count',
+        #             'horse_class','number_of_horses','Corner_rank_1','Corner_rank_2',
+        #             'Corner_rank_3','Corner_rank_4','Horse_weight','field_length',
+        #             'field_type_1','field_type_2',
+        #             ]]
+        df = df.drop(['Ranking','Race_Time','Corner_rank_1',
+            'Corner_rank_2', 'Corner_rank_3', 'Corner_rank_4'],axis=1)
         col_num = len(df.columns)
         row_num = len(df)
         print(f"Columns: {col_num}")

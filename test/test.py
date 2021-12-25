@@ -12,13 +12,13 @@ from model.main import MainData
 
 def test_scrape_pred():
         race_id = 202106040905
-        df = MainData.scrape_pred(202106040905)
-        assert df.empty == False 
+        df = MainData.scrape_pred(race_id)
+        assert df.empty == False
 
 
 def test_scrape_train():
-        test_result = MainData.save_to_db(test_mode=True)
-        assert test_result == {'Result': 'Update testing has successfully finished!!'}
+        test_result = MainData.save_to_db(test_mode=True,test_len=2)
+        assert test_result == {"Result":"Update testing has successfully finished!!"}
 
 
 def test_db_connect():
@@ -35,7 +35,7 @@ def test_get_data():
 #         assert MainData.create_model() != None
 
 
-# def test_prediction():
-#         race_id = 202106040905
-#         pred = MainData.predict(race_id)
-#         assert len(pred) > 1
+def test_prediction():
+        race_id = 202106040905
+        pred = MainData.predict(race_id)
+        assert len(pred) > 1
