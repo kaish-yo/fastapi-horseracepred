@@ -1,7 +1,7 @@
 from fastapi import FastAPI, BackgroundTasks
+from model.main import MainData 
 import uvicorn
 import os
-from model.main import MainData
 
 app = FastAPI()
 
@@ -24,7 +24,7 @@ async def update_db(background_tasks:BackgroundTasks):
 
 
 @app.post("/model/update") #学習モデルをアップデートする
-async def update_model(background_tasks: BackgroundTasks):  
+async def update_model(background_tasks: BackgroundTasks):
     background_tasks.add_task(MainData.create_model)
     return {"Success":"Model update has started in the background!"}
 

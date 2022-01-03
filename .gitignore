@@ -8,5 +8,10 @@ main_bk.py
 old/
 app_test.py
 main_test.py
+main_bk_2.py
+main_bk_2.__pycache__
 horse-race-pred-firebase-firebase-adminsdk-ov2p6-e744c2a3c2.json
 tests.py
+.gitignore
+df.json
+Tests.ipynb
