@@ -417,7 +417,7 @@ class MainData(SQLModel,table=True):
             race_date = race_date.timestamp()*1000
         else: #"/"の場合
             date_info = str(year) + '/' + date_info
-            race_date = datetime.strptime(date_info,'%Y/%m/%d')
+            race_date = datetime.datetime.strptime(date_info,'%Y/%m/%d')
             race_date = race_date.timestamp()*1000
         main_table['Race_date'] = race_date
         race_name = soup.find("div",{"class":"RaceName"}).text.rstrip("\n")
@@ -723,5 +723,3 @@ class MainData(SQLModel,table=True):
         oof_pred = oof_pred.sort_values(by=['Prediction'])
         oof_pred = oof_pred.values.tolist()
         return oof_pred
-    
-
