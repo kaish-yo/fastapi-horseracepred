@@ -117,9 +117,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 
 
 ##予測結果についてはログインしていないと取得できないようにする
-@app.get("/prediction") #モデルを用いて予測を実行する
-def pred(req: User = Depends(get_current_active_user)):
-    race_id = req.race_id
+@app.get("/prediction/{race_id}") #モデルを用いて予測を実行する
+def pred(race_id, user: User = Depends(get_current_active_user)):
     pred = MainData.predict(race_id)
     return pred
 
