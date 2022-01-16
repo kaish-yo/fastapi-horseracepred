@@ -1,0 +1,9 @@
+{
+    "secret_key":"ae884832f765f38c9c145caee5ec8b6c715348ceda2c58490b44078b824029ce",
+    "user_data":{
+        "api_user": {
+        "username": "api_user",
+        "hashed_password": "$2b$12$Olewo8LJykr1IzK3fcawJ.ib4N90/ZcFlcfK4nZTocdG6/GuLhrse"
+        }
+    }
+}
