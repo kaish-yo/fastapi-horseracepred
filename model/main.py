@@ -542,7 +542,13 @@ class MainData(SQLModel,table=True):
         df = pd.DataFrame(records)
         df = df.drop(['_sa_instance_state','record_id'],axis=1)
         return df
-
+    
+    @classmethod
+    def get_latest_record_date(cls):
+        session = cls.database_connect()
+        result = session.query(cls).order_by(cls.Race_date.desc()).first()
+        latest_date = result.Race_date
+        return latest_date      
 
     def transform_data(df): #transform train data to input it into the model
         #Label encodifng of Race_id

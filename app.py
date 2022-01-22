@@ -22,7 +22,7 @@ def home():
 '''#####################Security Purpose#####################'''
 # to get a string like this run:
 # openssl rand -hex 32
-with open("./user/security.json") as f: #keyなどはjsonファイルに格納
+with open("./user/security.json") as f: #keyなどはjsonファイルに格納。 時間があればFirebaseなどのNoSQLでこれらの情報は持たせたいところ
     d = json.load(f)
     SECRET_KEY = d["secret_key"]
     users = d["user_data"] #user_db
@@ -121,6 +121,13 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 def pred(race_id, user: User = Depends(get_current_active_user)):
     pred = MainData.predict(race_id)
     return pred
+
+
+##DBのアップデート状況を確認
+@app.get("/data/dbstatus")
+def get_status():
+    latest_record_date = MainData.get_latest_record_date()
+    return {"The latest update": latest_record_date}
 
 
 @app.post("/data/update") #Firebase上のデータベースをアップデートする #非同期処理
