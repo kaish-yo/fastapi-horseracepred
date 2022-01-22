@@ -394,7 +394,7 @@ class MainData(SQLModel,table=True):
     def scrape_pred(cls,race_id): 
         #既存のスクリプトをもとにスクレピングのコードを書く
         ##テーブルデータをまず引っ張る
-        base_URL = 'https://race.netkeiba.com/race/result.html?race_id='
+        base_URL = 'https://race.netkeiba.com/race/shutuba.html?race_id='
         dfs = pd.read_html(base_URL+str(race_id))
         main_table = dfs[0]
         columns = ['Uni_num','Hor_Num','印','Hor_name','Hor_sex_and_age','JockeyWeight','Jockey','Trainer','Horse_weight_Flux','Odds','人気','登録','メモ']
