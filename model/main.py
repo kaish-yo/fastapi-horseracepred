@@ -354,6 +354,8 @@ class MainData(SQLModel,table=True):
         df = pd.DataFrame() #threadごとに作成したテーブルを結合してこの変数に格納する
         for table in result:
             df = pd.concat([df,table])
+        #Corner_rankがないものについてはDrop.おそらくまだ更新されていないだけ
+        df = df.dropna(subset=['Corner_rank_1','Corner_rank_2','Corner_rank_3','Corner_rank_4'],how='all')
         return df
 
     @classmethod
@@ -368,9 +370,9 @@ class MainData(SQLModel,table=True):
                 # print(f"count:{index}")
                 adding_rec = MainData(**record)
                 records.append(adding_rec)
-            session = cls.database_connect()
-            print("status: db connected")
-            print(f'records to be stored:\n{records}')
+            # session = cls.database_connect()
+            # print("status: db connected")
+            # print(f'records to be stored:\n{records}')
             # session.add_all(records)
             # print("status: session created")
             # session.commit()
