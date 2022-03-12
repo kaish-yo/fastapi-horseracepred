@@ -7,7 +7,8 @@ WORKDIR /usr
 RUN apt-get update && apt-get install -y \
     tzdata \
     libgconf-2-4 \
-    wget
+    wget \
+    build-essential
 
 #install the chrome driver
 RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
