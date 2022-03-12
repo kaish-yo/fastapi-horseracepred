@@ -15,7 +15,7 @@ RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current
 && apt-get install -y --fix-broken /tmp/google-chrome-stable_current_amd64.deb
 
 # install dependencies
-COPY ./requirements.txt /usr/requirements/
+COPY ./requirements-prod.txt /usr/requirements/
 RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements-prod.txt
 
 #for production
