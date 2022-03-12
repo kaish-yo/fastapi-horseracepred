@@ -21,7 +21,7 @@ import chromedriver_binary  # パスを通すため
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import ast
 import concurrent.futures
