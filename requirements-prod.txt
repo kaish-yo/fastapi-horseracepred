@@ -54,7 +54,7 @@ pandocfilters==1.5.0
 parso==0.8.2
 passlib==1.7.4
 pexpect==4.8.0
-pickle5==0.0.12
+pickle5==0.0.11
 pickleshare==0.7.5
 pluggy==1.0.0
 prometheus-client==0.12.0
