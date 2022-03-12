@@ -1,5 +1,5 @@
 #pull official base image
-FROM python:3.9.6
+FROM python:3.9.6-slim-bullseye
 
 #set work directory
 WORKDIR /usr
@@ -15,7 +15,7 @@ RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current
 
 # install dependencies
 COPY ./requirements.txt /usr/requirements/
-RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements.txt
+RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements-prod.txt
 
 #for production
 COPY . .
