@@ -368,9 +368,43 @@ class MainData(SQLModel,table=True):
             return {"Result":"Update testing has successfully finished!!"}  
         if test_mode == True: #テストモード
             records = []
-            for _, record in df.iterrows():
+            for _, rec in df.iterrows():
                 # print(f"count:{index}")
-                adding_rec = MainData(**record)
+                adding_rec = MainData( #なぜか**でunpackしても失敗する...
+                    record_id=rec['Race_id'],
+                    Race_id=rec['Race_date'],
+                    Race_date=rec['Race_name'],
+                    Race_name=rec['Race_data_1'],
+                    Ranking=rec['Race_data_2'],
+                    Uni_num=rec['Ranking'],
+                    Hor_Num=rec['Uni_num'],
+                    Hor_name=rec['Hor_Num'],
+                    Hor_sex_and_age=rec['Hor_name'],
+                    JockeyWeight=rec['Hor_sex_and_age'],
+                    Jockey=rec['JockeyWeight'],
+                    Race_Time=rec['Jockey'],
+                    Odds_popularity=rec['Race_Time'],
+                    ato_3_F=rec['Arrival_diff'],
+                    Trainer=rec['Odds_popularity'],
+                    Horse_weight_Flux=rec['single_odds'],
+                    single_odds=rec['ato_3_F'],
+                    start_time=rec['Corner_ranking'],
+                    weather=rec['Trainer'],
+                    field_condition=rec['Horse_weight_Flux'],
+                    competition_count=rec['start_time'],
+                    venue_area=rec['weather'],
+                    day_count=rec['field_condition'],
+                    horse_class=rec['competition_count'],
+                    number_of_horses=rec['venue_area'],
+                    Corner_rank_1=rec['day_count'],
+                    Corner_rank_2=rec['horse_class'],
+                    Corner_rank_3=rec['number_of_horses'],
+                    Corner_rank_4=rec['Corner_rank_1'],
+                    Horse_weight=rec['Corner_rank_2'],
+                    field_length=rec['Corner_rank_3'],
+                    field_type_1=rec['Corner_rank_4'],
+                    field_type_2=rec['Horse_weight']
+                )
                 records.append(adding_rec)
             # session = cls.database_connect()
             # print("status: db connected")
@@ -382,9 +416,41 @@ class MainData(SQLModel,table=True):
             return {"Result":"Update testing has successfully finished!!"}  
         else:
             records = []
-            for _, record in df.iterrows():
+            for _, rec in df.iterrows():
                 # print(f"count:{index}")
-                adding_rec = MainData(**record)
+                adding_rec = MainData(record_id=rec['Race_id'],
+                    Race_id=rec['Race_date'],
+                    Race_date=rec['Race_name'],
+                    Race_name=rec['Race_data_1'],
+                    Ranking=rec['Race_data_2'],
+                    Uni_num=rec['Ranking'],
+                    Hor_Num=rec['Uni_num'],
+                    Hor_name=rec['Hor_Num'],
+                    Hor_sex_and_age=rec['Hor_name'],
+                    JockeyWeight=rec['Hor_sex_and_age'],
+                    Jockey=rec['JockeyWeight'],
+                    Race_Time=rec['Jockey'],
+                    Odds_popularity=rec['Race_Time'],
+                    ato_3_F=rec['Arrival_diff'],
+                    Trainer=rec['Odds_popularity'],
+                    Horse_weight_Flux=rec['single_odds'],
+                    single_odds=rec['ato_3_F'],
+                    start_time=rec['Corner_ranking'],
+                    weather=rec['Trainer'],
+                    field_condition=rec['Horse_weight_Flux'],
+                    competition_count=rec['start_time'],
+                    venue_area=rec['weather'],
+                    day_count=rec['field_condition'],
+                    horse_class=rec['competition_count'],
+                    number_of_horses=rec['venue_area'],
+                    Corner_rank_1=rec['day_count'],
+                    Corner_rank_2=rec['horse_class'],
+                    Corner_rank_3=rec['number_of_horses'],
+                    Corner_rank_4=rec['Corner_rank_1'],
+                    Horse_weight=rec['Corner_rank_2'],
+                    field_length=rec['Corner_rank_3'],
+                    field_type_1=rec['Corner_rank_4'],
+                    field_type_2=rec['Horse_weight'])
                 records.append(adding_rec)
             session = cls.database_connect()
             print("status: db connected")
