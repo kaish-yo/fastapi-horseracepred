@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 from sqlmodel import Field, SQLModel, Session, select
+from sqlalchemy.schema import Column
+from sqlalchemy.types import BigInteger
 from db import engine
 from functools import total_ordering
 import requests
@@ -29,8 +31,8 @@ import threading
 
 
 class MainData(SQLModel,table=True):
-    record_id: Optional[int] = Field(default=None,primary_key=True)
-    Race_id: int
+    record_id: Optional[int] = Field(default_factory="next_val", sa_column=Column(BigInteger(), primary_key=True, autoincrement=False))
+    Race_id: Optional[int] = Field(default_factory="next_val", sa_column=Column(BigInteger(), primary_key=False, autoincrement=False))
     Race_date: int
     Race_name: str
     Ranking: int
