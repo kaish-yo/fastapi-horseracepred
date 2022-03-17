@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 from sqlmodel import Field, SQLModel, Session, select
+from sqlalchemy.schema import Column
+from sqlalchemy.types import BigInteger
 from db import engine
 from functools import total_ordering
 import requests
@@ -21,7 +23,7 @@ import chromedriver_binary  # パスを通すため
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 import time
 import ast
 import concurrent.futures
@@ -30,7 +32,7 @@ import threading
 
 class MainData(SQLModel,table=True):
     record_id: Optional[int] = Field(default=None,primary_key=True)
-    Race_id: int
+    Race_id: Optional[int] = Field(default_factory="next_val", sa_column=Column(BigInteger(), primary_key=False, autoincrement=False))
     Race_date: int
     Race_name: str
     Ranking: int
@@ -366,9 +368,9 @@ class MainData(SQLModel,table=True):
             return {"Result":"Update testing has successfully finished!!"}  
         if test_mode == True: #テストモード
             records = []
-            for _, record in df.iterrows():
+            for _, rec in df.iterrows():
                 # print(f"count:{index}")
-                adding_rec = MainData(**record)
+                adding_rec = MainData(**rec)
                 records.append(adding_rec)
             # session = cls.database_connect()
             # print("status: db connected")
@@ -380,9 +382,9 @@ class MainData(SQLModel,table=True):
             return {"Result":"Update testing has successfully finished!!"}  
         else:
             records = []
-            for _, record in df.iterrows():
+            for _, rec in df.iterrows():
                 # print(f"count:{index}")
-                adding_rec = MainData(**record)
+                adding_rec = MainData(**rec)
                 records.append(adding_rec)
             session = cls.database_connect()
             print("status: db connected")

@@ -15,3 +15,11 @@ tests.py
 .gitignore
 df.json
 Tests.ipynb
+db_pg.py
+create_db_pg.py
+data_exp.csv
+.Trash-0
+.gitignore
+.pytest_cache
+.ipynb_checkpoints
+test_private.ipynb

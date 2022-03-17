@@ -1,12 +1,14 @@
 #pull official base image
-FROM python:3.9.6
+FROM python:3.9.10-slim-bullseye
 
 #set work directory
 WORKDIR /usr
 # update some packages and run a installation command
 RUN apt-get update && apt-get install -y \
     tzdata \
-    libgconf-2-4
+    libgconf-2-4 \
+    wget \
+    build-essential
 
 #install the chrome driver
 RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
@@ -14,8 +16,8 @@ RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current
 && apt-get install -y --fix-broken /tmp/google-chrome-stable_current_amd64.deb
 
 # install dependencies
-COPY ./requirements.txt /usr/requirements/
-RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements.txt
+COPY ./requirements-prod.txt /usr/requirements/
+RUN pip install --upgrade pip && pip install -r /usr/requirements/requirements-prod.txt
 
 #for production
 COPY . .
