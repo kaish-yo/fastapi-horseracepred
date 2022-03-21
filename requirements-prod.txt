@@ -110,3 +110,4 @@ webencodings==0.5.1
 wsproto==1.0.0
 pathlib==1.0.1
 psycopg2-binary==2.9.3
+azure-storage-blob==12.10.0
