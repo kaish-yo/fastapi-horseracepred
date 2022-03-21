@@ -17,8 +17,8 @@ variables:
   containerRegistry: 'horseracepredimages.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile.prod'
   tag: '$(Build.BuildId)'
-  DATABASE_URL: $(DATABASE_URL)
-  AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
+  DATABASE_URL: $(DatabaseURL)
+  AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
 
   # Agent VM image namev
   vmImageName: 'ubuntu-latest'
