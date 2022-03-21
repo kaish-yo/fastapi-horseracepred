@@ -43,6 +43,7 @@ stages:
         AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
 
     - script: |
+        pip install pytest pytest-azurepipelines
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
       env:
