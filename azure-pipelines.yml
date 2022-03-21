@@ -17,6 +17,8 @@ variables:
   containerRegistry: 'horseracepredimages.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile.prod'
   tag: '$(Build.BuildId)'
+  DATABASE_URL  : $(DATABASE_URL)
+  AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
   # Agent VM image namev
   vmImageName: 'ubuntu-latest'
@@ -42,9 +44,6 @@ stages:
     - script: |
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
-      env:
-        DATABASE_URL  : $(DATABASE_URL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
