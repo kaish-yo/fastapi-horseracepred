@@ -1,5 +1,5 @@
 # Horse Race Prediction API
-This backend does prediction of horse races retrieving data from "https://www.netkeiba.com"
+This backend does prediction of horse races retrieving data from https://www.netkeiba.com
 
 # Overview
 The overview of this application is the follwing.
