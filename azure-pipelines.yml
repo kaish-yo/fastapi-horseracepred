@@ -19,6 +19,7 @@ variables:
   tag: '$(Build.BuildId)'
   # Agent VM image namev
   vmImageName: 'ubuntu-latest'
+  group: HorseRaceAppVariables
 
 stages:
 - stage: Build
