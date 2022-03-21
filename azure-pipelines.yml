@@ -11,16 +11,15 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   azureSubscription: 'horse-race-app-resource-conn'
-  appName: 'horse-race-pred-realtime'
+  appName: 'horse-race-pred-realti=me'
   dockerRegistryServiceConnection: 'ace00ce3-3881-4289-b0d2-67f328b52a91'
   imageRepository: 'kaishyofastapihorseracepred'
   containerRegistry: 'horseracepredimages.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile.prod'
   tag: '$(Build.BuildId)'
-  DATABASE_URL: ${{ variables.DATABASE_URL }}
-
-  # Agent VM image name
+  # Agent VM image namev
   vmImageName: 'ubuntu-latest'
+  group: HorseRaceAppVariables
 
 stages:
 - stage: Build
@@ -40,9 +39,18 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
+      env:
+        DATABASE_URL: $(DatabaseURL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+
     - script: |
+        pip install pytest pytest-azurepipelines
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
-      displayName: 'pytest'      
+      displayName: 'pytest'
+      env:
+        DATABASE_URL: $(DatabaseURL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
       inputs:
