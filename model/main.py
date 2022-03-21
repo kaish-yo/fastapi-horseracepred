@@ -28,6 +28,9 @@ import time
 import ast
 import concurrent.futures
 import threading
+from env_vars import blob_conn_str
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+
 
 
 class MainData(SQLModel,table=True):
@@ -682,6 +685,16 @@ class MainData(SQLModel,table=True):
             
             with open(f'pred_model_{i}.pkl', mode='wb') as f: #save each model
                 pickle.dump(model,f)
+                saved_file_name = f'pred_model_{i}.pkl'
+                ## Add some code to upload the files to Azure Storage here
+                # Create a blob client using the local file name as the name for the blob
+                blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
+                container_name = 'modelbinarydata'
+                blob_client = blob_service_client.get_blob_client(container=container_name,blob=saved_file_name)
+                print("\nUploading to Azure Storage as blob:\n\t" + saved_file_name)
+                # Upload the created file
+                with open(saved_file_name,'rb') as data:
+                    blob_client.upload_blob(data,overwrite=True)
 
         result = pd.DataFrame(oof_predictions,columns=['predicted_class'])
 
@@ -720,7 +733,18 @@ class MainData(SQLModel,table=True):
         #Read each model
         model = []
         for i in range(0,15):
-            with open(f'pred_model_{i}.pkl',mode='rb') as f:
+            ## Add some code to download the files to Azure Storage here
+            downloaded_file_name = f'pred_model_{i}.pkl'
+            # Connect to Azure Storage and the targeted file
+            blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
+            container_name = 'modelbinarydata'
+            blob_client = blob_service_client.get_blob_client(container=container_name,blob= downloaded_file_name)    
+            # Download and overwrite each model's binary file in local
+            with open(downloaded_file_name, 'wb') as f:
+                f.write(blob_client.download_blob().readall())
+            print(f'Retrived from Azure and updated model file: {downloaded_file_name}')
+            # Load the updated local file and added to the list to be used for prediction later
+            with open(downloaded_file_name,mode='rb') as f:
                 each_model = pickle.load(f)
                 model.append(each_model)
         #predict
