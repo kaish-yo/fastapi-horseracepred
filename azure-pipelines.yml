@@ -38,9 +38,9 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-        env:
-          DATABASE_URL: $(DatabaseURL)
-          AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+      env:
+        DATABASE_URL: $(DatabaseURL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
 
     - script: |
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
