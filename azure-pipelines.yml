@@ -37,8 +37,8 @@ stages:
         command: 'build'
         Dockerfile: $(dockerfilePath)
         arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'
-        tags: |
-           $(tag)
+        # tags: |
+        #    $(tag)
         
     - task: Docker@2
       displayName: Push the image to container registry
@@ -46,8 +46,8 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         repository: $(imageRepository)
         command: 'push'
-        tags: |
-           $(tag)
+        # tags: |
+        #    $(tag)
 
     # - task: Docker@2
     #   displayName: Build and push an image to container registry
@@ -60,7 +60,7 @@ stages:
     #       $(tag)
     - script: |
         pip install pytest pytest-azurepipelines
-        docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
+        docker run $(containerRegistry)/$(imageRepository):latest pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
       env:
         DATABASE_URL: $(DatabaseURL)
@@ -71,4 +71,4 @@ stages:
       inputs:
         azureSubscription: 'horse-race-app-resource-conn'
         appName: 'horse-race-pred-realtime'
-        containers: $(containerRegistry)/$(imageRepository):$(tag)
+        containers: $(containerRegistry)/$(imageRepository):latest
