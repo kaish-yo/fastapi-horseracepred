@@ -37,7 +37,9 @@ stages:
         command: 'build'
         Dockerfile: $(dockerfilePath)
         arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'
-    
+        tags: |
+           $(tag)
+        
     - task: Docker@2
       displayName: Push the image to container registry
       inputs:
@@ -56,7 +58,6 @@ stages:
     #     containerRegistry: $(dockerRegistryServiceConnection)
     #     tags: |
     #       $(tag)
-
     - script: |
         pip install pytest pytest-azurepipelines
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
