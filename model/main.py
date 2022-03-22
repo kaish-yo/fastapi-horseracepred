@@ -682,23 +682,23 @@ class MainData(SQLModel,table=True):
                             num_boost_round =5000,
                             )
             oof_predictions[val_index] = model.predict(X_val,num_iteration=model.best_iteration)
-            try:
-                with open(f'pred_model_{i}.pkl', mode='wb') as f: #save each model
-                    pickle.dump(model,f)
-                    saved_file_name = f'pred_model_{i}.pkl'
-                    ## Add some code to upload the files to Azure Storage here
-                    # Create a blob client using the local file name as the name for the blob
-                    blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
-                    container_name = 'modelbinarydata'
-                    blob_client = blob_service_client.get_blob_client(container=container_name,blob=saved_file_name)
-                    print("\nUploading to Azure Storage as blob:\n\t" + saved_file_name)
-                    # Upload the created file
-                    with open(saved_file_name,'rb') as data:
-                        blob_client.upload_blob(data,overwrite=True)
-            except:
-                print("Warning: Updates to Azure Storage has failed")
-                with open(f'pred_model_{i}.pkl', mode='wb') as f: #save each model
-                    pickle.dump(model,f)
+            # try:
+            with open(f'pred_model_{i}.pkl', mode='wb') as f: #save each model
+                pickle.dump(model,f)
+                saved_file_name = f'pred_model_{i}.pkl'
+                ## Add some code to upload the files to Azure Storage here
+                # Create a blob client using the local file name as the name for the blob
+                blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
+                container_name = 'modelbinarydata'
+                blob_client = blob_service_client.get_blob_client(container=container_name,blob=saved_file_name)
+                print("\nUploading to Azure Storage as blob:\n\t" + saved_file_name)
+                # Upload the created file
+                with open(saved_file_name,'rb') as data:
+                    blob_client.upload_blob(data,overwrite=True)
+            # except:
+            #     print("Warning: Updates to Azure Storage has failed")
+            #     with open(f'pred_model_{i}.pkl', mode='wb') as f: #save each model
+            #         pickle.dump(model,f)
 
         result = pd.DataFrame(oof_predictions,columns=['predicted_class'])
 
@@ -716,16 +716,6 @@ class MainData(SQLModel,table=True):
         #     return {"Error":"No table found."}
         Hor_df = df['Hor_name']
         df = cls.transform_data_pred(df)
-        # #学習データとcolumnを一致させる
-        # df = df[['Race_id','Race_date','Race_name','Ranking','Uni_num',
-        #             'Hor_Num','Hor_name','Hor_sex_and_age','JockeyWeight',
-        #             'Jockey','Race_Time','Odds_popularity','ato_3_F',
-        #             'Trainer','Horse_weight_Flux','single_odds','start_time','weather',
-        #             'field_condition','competition_count','venue_area','day_count',
-        #             'horse_class','number_of_horses','Corner_rank_1','Corner_rank_2',
-        #             'Corner_rank_3','Corner_rank_4','Horse_weight','field_length',
-        #             'field_type_1','field_type_2',
-        #             ]]
         df = df.drop(['Ranking','Race_Time','Corner_rank_1',
             'Corner_rank_2', 'Corner_rank_3', 'Corner_rank_4'],axis=1)
         col_num = len(df.columns)
@@ -739,24 +729,24 @@ class MainData(SQLModel,table=True):
         for i in range(0,15):
             ## Add some code to download the files to Azure Storage here
             downloaded_file_name = f'pred_model_{i}.pkl'
-            try:
-                # Connect to Azure Storage and the targeted file
-                blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
-                container_name = 'modelbinarydata'
-                blob_client = blob_service_client.get_blob_client(container=container_name,blob= downloaded_file_name)    
-                # Download and overwrite each model's binary file in local
-                with open(downloaded_file_name, 'wb') as f:
-                    f.write(blob_client.download_blob().readall())
-                print(f'Retrived from Azure and updated model file: {downloaded_file_name}')
-                # Load the updated local file and added to the list to be used for prediction later
-                with open(downloaded_file_name,mode='rb') as f:
-                    each_model = pickle.load(f)
-                    model.append(each_model)
-            except:
-                print('Warning: Access to Azure Storage has failed')
-                with open(downloaded_file_name,mode='rb') as f:
-                    each_model = pickle.load(f)
-                    model.append(each_model)
+            # try:
+            # Connect to Azure Storage and the targeted file
+            blob_service_client = BlobServiceClient.from_connection_string(blob_conn_str)
+            container_name = 'modelbinarydata'
+            blob_client = blob_service_client.get_blob_client(container=container_name,blob= downloaded_file_name)    
+            # Download and overwrite each model's binary file in local
+            with open(downloaded_file_name, 'wb') as f:
+                f.write(blob_client.download_blob().readall())
+            print(f'Retrived from Azure and updated model file: {downloaded_file_name}')
+            # Load the updated local file and added to the list to be used for prediction later
+            with open(downloaded_file_name,mode='rb') as f:
+                each_model = pickle.load(f)
+                model.append(each_model)
+            # except:
+            #     print('Warning: Access to Azure Storage has failed')
+            #     with open(downloaded_file_name,mode='rb') as f:
+            #         each_model = pickle.load(f)
+            #         model.append(each_model)
         
         #predict
         oof_pred = np.zeros(df.shape[0])
