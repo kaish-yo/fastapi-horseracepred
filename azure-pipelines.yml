@@ -37,14 +37,11 @@ stages:
         repository: $(imageRepository)
         command: 'build'
         dockerfile: $(dockerfilePath)
-        arguments: '--build-arg DATABASE_URL=$(DatabaseURL) --build-arg AZURE_STORAGE_CONNECTION_STRING=$(AzureStorageConnectionString)'    
+        arguments: --build-arg DATABASE_URL=$(DatabaseURL) --build-arg AZURE_STORAGE_CONNECTION_STRING=$(AzureStorageConnectionString)    
         tags: |
           $(tag)
         image_tag: $(tag)
-      env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
-
+    
     - task: Docker@2
       displayName: Push the image to container registry
       inputs:
@@ -54,9 +51,6 @@ stages:
         image_tag: $(tag)
         tags: |
           $(tag)
-      env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
 
     - script: |
         pip install pytest pytest-azurepipelines
