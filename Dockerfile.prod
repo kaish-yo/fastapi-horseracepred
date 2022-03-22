@@ -10,10 +10,10 @@ RUN apt-get update && apt-get install -y \
     wget \
     build-essential
 
-ARG DatabaseURL
-ARG AzureStorageConnectionString
-ENV DATABASE_URL=$DatabaseURL
-ENV AZURE_STORAGE_CONNECTION_STRING=$AzureStorageConnectionString
+ARG DATABASE_URL
+ARG AZURE_STORAGE_CONNECTION_STRING
+ENV DATABASE_URL=$DATABASE_URL
+ENV AZURE_STORAGE_CONNECTION_STRING=$AZURE_STORAGE_CONNECTION_STRING
 
 #install the chrome driver
 RUN wget -P /tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \

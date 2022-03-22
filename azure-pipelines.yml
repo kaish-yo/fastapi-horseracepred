@@ -19,7 +19,7 @@ variables:
   tag: '$(Build.BuildId)'
   # Agent VM image namev
   vmImageName: 'ubuntu-latest'
-  group: HorseRaceAppVariables
+  # - group: HorseRaceAppVariables
 
 stages:
 - stage: Build
@@ -37,7 +37,7 @@ stages:
         repository: $(imageRepository)
         command: 'build'
         dockerfile: $(dockerfilePath)
-        arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'    
+        arguments: '--build-arg DATABASE_URL=$(DatabaseURL) --build-arg AZURE_STORAGE_CONNECTION_STRING=$(AzureStorageConnectionString)'    
         tags: |
           $(tag)
         image_tag: $(tag)
