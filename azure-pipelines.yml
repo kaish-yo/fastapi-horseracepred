@@ -58,7 +58,7 @@ stages:
       displayName: 'pytest'
       env:
         DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
 
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
