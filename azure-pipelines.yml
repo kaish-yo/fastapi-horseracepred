@@ -35,19 +35,14 @@ stages:
       inputs:
         containerRegistry: $(dockerRegistryServiceConnection)
         command: 'build'
-        Dockerfile: $(dockerfilePath)
-        arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'
-        # tags: |
-        #    $(tag)
-        
+        dockerfile: $(dockerfilePath)
+        arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'    
     - task: Docker@2
       displayName: Push the image to container registry
       inputs:
         containerRegistry: $(dockerRegistryServiceConnection)
         repository: $(imageRepository)
         command: 'push'
-        # tags: |
-        #    $(tag)
 
     # - task: Docker@2
     #   displayName: Build and push an image to container registry
@@ -58,9 +53,10 @@ stages:
     #     containerRegistry: $(dockerRegistryServiceConnection)
     #     tags: |
     #       $(tag)
+
     - script: |
         pip install pytest pytest-azurepipelines
-        docker run $(containerRegistry)/$(imageRepository):latest pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
+        docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
       env:
         DATABASE_URL: $(DatabaseURL)
