@@ -34,6 +34,7 @@ stages:
       displayName: Build an image
       inputs:
         containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
         command: 'build'
         dockerfile: $(dockerfilePath)
         arguments: '--build-arg DatabaseURL=$(DatabaseURL) --build-arg AzureStorageConnectionString=$(AzureStorageConnectionString)'    
