@@ -55,7 +55,7 @@ stages:
         tags: |
           $(tag)
       env:
-       DATABASE_URL: $(DATABASE_URL)
+        DATABASE_URL: $(DATABASE_URL)
         AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - script: |
