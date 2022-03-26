@@ -42,8 +42,8 @@ stages:
           $(tag)
         image_tag: $(tag)
       env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
+        DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - task: Docker@2
       displayName: Push the image to container registry
@@ -55,16 +55,16 @@ stages:
         tags: |
           $(tag)
       env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
+       DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - script: |
         pip install pytest pytest-azurepipelines
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
       env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
+        DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
