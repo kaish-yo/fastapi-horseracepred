@@ -11,7 +11,7 @@ resources:
 variables:
   # Container registry service connection established during pipeline creation
   azureSubscription: 'horse-race-app-resource-conn'
-  appName: 'horse-race-pred-realti=me'
+  appName: 'horse-race-pred-realtime'
   dockerRegistryServiceConnection: 'ace00ce3-3881-4289-b0d2-67f328b52a91'
   imageRepository: 'kaishyofastapihorseracepred'
   containerRegistry: 'horseracepredimages.azurecr.io'
@@ -19,7 +19,7 @@ variables:
   tag: '$(Build.BuildId)'
   # Agent VM image namev
   vmImageName: 'ubuntu-latest'
-  group: HorseRaceAppVariables
+  # - group: HorseRaceAppVariables
 
 stages:
 - stage: Build
@@ -31,25 +31,40 @@ stages:
       vmImage: $(vmImageName)
     steps:
     - task: Docker@2
-      displayName: Build and push an image to container registry
+      displayName: Build an image
       inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        command: 'build'
+        dockerfile: $(dockerfilePath)
+        arguments: --build-arg DATABASE_URL=$(DATABASE_URL) --build-arg AZURE_STORAGE_CONNECTION_STRING=$(AZURE_STORAGE_CONNECTION_STRING)    
+        tags: |
+          $(tag)
+        image_tag: $(tag)
+      env:
+        DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
+
+    - task: Docker@2
+      displayName: Push the image to container registry
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        command: 'push'
+        image_tag: $(tag)
         tags: |
           $(tag)
       env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+        DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - script: |
         pip install pytest pytest-azurepipelines
         docker run $(containerRegistry)/$(imageRepository):$(tag) pytest --doctest-modules --junitxml=junit/test-results.xml --disable-pytest-warnings ./test/test.py
       displayName: 'pytest'
       env:
-        DATABASE_URL: $(DatabaseURL)
-        AZURE_STORAGE_CONNECTION_STRING: $(AzureConnectionString)
+        DATABASE_URL: $(DATABASE_URL)
+        AZURE_STORAGE_CONNECTION_STRING: $(AZURE_STORAGE_CONNECTION_STRING)
 
     - task: AzureWebAppContainer@1
       displayName: 'Azure Web App on Container Deploy'
