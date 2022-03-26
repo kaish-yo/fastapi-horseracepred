@@ -71,4 +71,4 @@ stages:
       inputs:
         azureSubscription: 'horse-race-app-resource-conn'
         appName: 'horse-race-pred-realtime'
-        containers: $(containerRegistry)/$(imageRepository):latest
+        containers: $(containerRegistry)/$(imageRepository):$(tag)
